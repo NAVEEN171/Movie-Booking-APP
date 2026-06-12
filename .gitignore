@@ -1,0 +1,15 @@
+# Maven
+target/
+movieticketplatform/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Sensitive config
+**/application.properties
+
+# OS
+.DS_Store
+Thumbs.db
