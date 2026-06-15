@@ -33,7 +33,7 @@ public class TheaterService {
         Theater newTheater=theaterMapper.toTheaterEntity(theater);
         newTheater.setIsActive(true);
         newTheater.setCreatedBy(1L);
-        Theater savedTheater=theaterRepository.save(newTheater);
+        Theater savedTheater= theaterRepository.save(newTheater);
         for(TheaterPricingDto basePricing:theater.getTheaterBasePricing()){
             TheaterSeatPricing TheaterSeatPrice=new TheaterSeatPricing();
             TheaterSeatPrice.setBasePrice(basePricing.getPrice());
