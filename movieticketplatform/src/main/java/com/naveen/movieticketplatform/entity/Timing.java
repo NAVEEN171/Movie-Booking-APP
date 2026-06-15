@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Data
 @Entity
 @Table(name="timings")
-public class Timing {
+public class Timing extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,9 +31,10 @@ public class Timing {
     @Column(nullable = false)
     private Integer bufferTime;
 
-    @Column(nullable = false)
-    private TimingsType timingsType;
 
 
     private LocalDate applicableTill;
+
+    @Column(nullable = false)
+    private Boolean isActive = true;
 }

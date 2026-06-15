@@ -1,9 +1,11 @@
 package com.naveen.movieticketplatform.dto;
 
+import com.naveen.movieticketplatform.enums.TheaterType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -46,4 +48,9 @@ public class TheaterRequestDto {
 
     @NotBlank
     private String city;
+
+    @NotNull
+    private TheaterType theaterType;
+
+    private List<TheaterPricingDto> theaterBasePricing;
 }

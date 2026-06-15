@@ -1,7 +1,6 @@
 package com.naveen.movieticketplatform.controller;
 
 
-import com.naveen.movieticketplatform.dto.TheaterRequestDto;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
 import com.naveen.movieticketplatform.entity.TimingMain;
 import com.naveen.movieticketplatform.service.TimingsService;

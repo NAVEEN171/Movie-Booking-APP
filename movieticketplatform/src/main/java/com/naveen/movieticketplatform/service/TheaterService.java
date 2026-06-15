@@ -1,12 +1,15 @@
 package com.naveen.movieticketplatform.service;
 
+import com.naveen.movieticketplatform.dto.TheaterPricingDto;
 import com.naveen.movieticketplatform.dto.TheaterRequestDto;
 import com.naveen.movieticketplatform.entity.Seat;
 import com.naveen.movieticketplatform.entity.Theater;
+import com.naveen.movieticketplatform.entity.TheaterSeatPricing;
 import com.naveen.movieticketplatform.enums.SeatType;
 import com.naveen.movieticketplatform.mapper.TheaterMapper;
 import com.naveen.movieticketplatform.repository.SeatRepository;
 import com.naveen.movieticketplatform.repository.TheaterRepository;
+import com.naveen.movieticketplatform.repository.TheaterSeatPricingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +25,23 @@ public class TheaterService {
     private final TheaterRepository theaterRepository;
     private final SeatRepository seatRepository;
     private final TheaterMapper theaterMapper;
+    private final TheaterSeatPricingRepository theaterSeatPricingRepository;
 
     @Transactional
     public Theater createTheater(TheaterRequestDto theater){
 
         Theater newTheater=theaterMapper.toTheaterEntity(theater);
         newTheater.setIsActive(true);
+        newTheater.setCreatedBy(1L);
         Theater savedTheater=theaterRepository.save(newTheater);
+        for(TheaterPricingDto basePricing:theater.getTheaterBasePricing()){
+            TheaterSeatPricing TheaterSeatPrice=new TheaterSeatPricing();
+            TheaterSeatPrice.setBasePrice(basePricing.getPrice());
+            TheaterSeatPrice.setSeatType(basePricing.getSeatType());
+            TheaterSeatPrice.setTheater(savedTheater);
+            TheaterSeatPrice.setIsActive(true);
+            theaterSeatPricingRepository.save(TheaterSeatPrice);
+        }
         List<Seat> seats=generateSeatOfTheater(savedTheater,theater.getReclinerRowIndexes(),theater.getRegularRowIndexes());
         if(!seats.isEmpty()){
             int batchSize = 50;
@@ -38,6 +51,7 @@ public class TheaterService {
                 seatRepository.flush();
             }
         }
+
         return  savedTheater;
     }
 
@@ -53,6 +67,7 @@ public class TheaterService {
                        char seatRow=(char)('A'+row);
                        String seatNum= seatRow+String.valueOf((seatNo+1));
                        seat.setSeatNo(seatNum);
+                       seat.setCreatedBy(1L);
                        seat.setSeatType(determineSeatType(row,reclinerRowIndexes,regularRowIndexes));
                        seat.setIsActive(true);
                        theaterSeats.add(seat);

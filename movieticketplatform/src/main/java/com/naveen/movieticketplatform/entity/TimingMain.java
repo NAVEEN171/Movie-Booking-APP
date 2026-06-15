@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="timings_main")
-public class TimingMain {
+public class TimingMain extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;

@@ -1,6 +1,8 @@
 package com.naveen.movieticketplatform.service;
 
 
+import com.naveen.movieticketplatform.dto.TheaterPricingDto;
+import com.naveen.movieticketplatform.dto.TheaterRequestDto;
 import com.naveen.movieticketplatform.dto.TimingDto;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
 import com.naveen.movieticketplatform.entity.Theater;
@@ -44,7 +46,6 @@ public class TimingsService {
             for (TimingDto timing : timings.getTimingsDto()) {
                 Timing newTiming = new Timing();
                 newTiming.setBufferTime(timing.getBufferTime());
-                newTiming.setTimingsType(timings.getTimingsType());
                 newTiming.setStartTime(timing.getStartTime());
                 newTiming.setEndTime(timing.getEndTime());
                 newTiming.setApplicableTill(timing.getApplicableTill());
@@ -65,7 +66,6 @@ public class TimingsService {
                  newTiming.setStartTime(startTime);
                  newTiming.setEndTime(endTime);
                  newTiming.setBufferTime(bufferMinutes);
-                 newTiming.setTimingsType(timings.getTimingsType());
                  newTiming.setApplicableTill(LocalDate.now().plusDays(5));
 
                  timingMain.addTiming(newTiming);
@@ -73,6 +73,7 @@ public class TimingsService {
 
              }
         }
+
 
         return timingMainRepository.save(timingMain);
     }

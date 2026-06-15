@@ -1,18 +1,23 @@
 package com.naveen.movieticketplatform.entity;
 
+import com.naveen.movieticketplatform.enums.TheaterType;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name="theaters")
-public class Theater {
+public class Theater extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String theaterName;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TheaterType theaterType;
 
     @Column(nullable = false)
     private String location;

@@ -1,30 +1,30 @@
 package com.naveen.movieticketplatform.entity;
 
-
 import com.naveen.movieticketplatform.enums.SeatType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Entity
-@Table(name="seats")
-public class Seat extends BaseEntity {
+@Table(name = "theater_seat_pricing")
+public class TheaterSeatPricing  extends BaseEntity{
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_seq")
-    @SequenceGenerator(name = "seat_seq", sequenceName = "seat_seq_id", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_id", nullable = false)
     private Theater theater;
-
-    @Column(nullable = false)
-    private String seatNo;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SeatType seatType;
 
-    private Boolean isActive = true;
+    @Column(nullable = false)
+    private BigDecimal basePrice;
 
+    private Boolean isActive = true;
 }
