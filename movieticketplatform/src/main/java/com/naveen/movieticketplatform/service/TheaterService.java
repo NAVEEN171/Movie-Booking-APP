@@ -40,6 +40,7 @@ public class TheaterService {
             TheaterSeatPrice.setSeatType(basePricing.getSeatType());
             TheaterSeatPrice.setTheater(savedTheater);
             TheaterSeatPrice.setIsActive(true);
+            TheaterSeatPrice.setCreatedBy(1L);
             theaterSeatPricingRepository.save(TheaterSeatPrice);
         }
         List<Seat> seats=generateSeatOfTheater(savedTheater,theater.getReclinerRowIndexes(),theater.getRegularRowIndexes());
