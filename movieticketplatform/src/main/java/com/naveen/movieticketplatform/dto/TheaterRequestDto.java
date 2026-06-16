@@ -14,17 +14,7 @@ public class TheaterRequestDto {
     @NotBlank
     private String theaterName;
 
-    @NotBlank
-    private String location;
 
-    @NotNull
-    private Double latitude;
-
-    @NotNull
-    private Double longitude;
-
-    private Double distanceFromComplex;
-    private Double distanceFromRailwayStation;
 
     private Set<Integer> reclinerRowIndexes = new HashSet<>();
     private Set<Integer> regularRowIndexes = new HashSet<>();
@@ -46,11 +36,6 @@ public class TheaterRequestDto {
     private Boolean defaultTimings = true;
     private Integer bufferTime;
 
-    @NotBlank
-    private String city;
 
-    @NotNull
-    private TheaterType theaterType;
 
-    private List<TheaterPricingDto> theaterBasePricing;
 }

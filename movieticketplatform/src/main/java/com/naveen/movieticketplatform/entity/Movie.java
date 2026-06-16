@@ -71,7 +71,7 @@ public class Movie extends BaseEntity  {
     private Theater theater;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "timing_main_id", nullable = false)
+    @JoinColumn(name = "timing_main_id", nullable = true)
     private TimingMain timingsMain;
 
     @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)

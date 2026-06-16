@@ -15,23 +15,13 @@ public class Theater extends BaseEntity {
     @Column(nullable = false)
     private String theaterName;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TheaterType theaterType;
-
-    @Column(nullable = false)
-    private String location;
-
-    @Column(nullable = false)
-    private Double latitude;
-
-    @Column(nullable = false)
-    private Double longitude;
-    private Double distanceFromComplex;
-    private Double distanceFromRailwayStation;
 
     @Column(nullable = false)
     private Integer noOfRows;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_theater_id", nullable = false)
+    private MainTheater mainTheater;
 
     @Column(nullable = false)
     private Integer noOfRowsInARow;
@@ -42,8 +32,7 @@ public class Theater extends BaseEntity {
     private Boolean defaultTimings;
 
     private Integer bufferTime;
-    @Column(nullable = false)
-    private String city;
+
 
     private Boolean isActive = true;
 

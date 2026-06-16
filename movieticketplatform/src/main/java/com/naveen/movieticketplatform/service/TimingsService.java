@@ -5,10 +5,12 @@ import com.naveen.movieticketplatform.dto.TheaterPricingDto;
 import com.naveen.movieticketplatform.dto.TheaterRequestDto;
 import com.naveen.movieticketplatform.dto.TimingDto;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
+import com.naveen.movieticketplatform.entity.Movie;
 import com.naveen.movieticketplatform.entity.Theater;
 import com.naveen.movieticketplatform.entity.Timing;
 import com.naveen.movieticketplatform.entity.TimingMain;
 import com.naveen.movieticketplatform.enums.TimingsType;
+import com.naveen.movieticketplatform.repository.MovieRepository;
 import com.naveen.movieticketplatform.repository.TheaterRepository;
 import com.naveen.movieticketplatform.repository.TimingMainRepository;
 import com.naveen.movieticketplatform.repository.TimingRepository;
@@ -28,6 +30,7 @@ public class TimingsService {
     private final TimingMainRepository timingMainRepository;
     private final TimingRepository timingRepository;
     private final TheaterRepository theaterRepository;
+    private final MovieRepository movieRepository;
 
 
     @Transactional
@@ -35,6 +38,8 @@ public class TimingsService {
 
         Theater theater=theaterRepository.findById(timings.getTheaterId())
                 .orElseThrow(() -> new RuntimeException("Theater not found: " + timings.getTheaterId()));
+
+        Movie movie=movieRepository.findById(timings.getMovieId()).orElseThrow(()-> new RuntimeException("Movie Not Found: "+timings.getMovieId()));
         TimingMain timingMain=new TimingMain();
         timingMain.setTheater(theater);
         timingMain.setTimingsType(timings.getTimingsType());
@@ -48,14 +53,14 @@ public class TimingsService {
                 newTiming.setBufferTime(timing.getBufferTime());
                 newTiming.setStartTime(timing.getStartTime());
                 newTiming.setEndTime(timing.getEndTime());
-                newTiming.setApplicableTill(timing.getApplicableTill());
+                newTiming.setApplicableTill(movie.getEndDate());
                 timingMain.addTiming(newTiming);
             }
         }
         else{
              for(int i=0;i<timings.getNoOfShows();i++){
                  LocalTime baseStartTime = timings.getStartTime();
-                 Integer movieDuration = 120;
+                 Integer movieDuration = movie.getDurationInMin();
                  Integer bufferMinutes = timings.getBufferTime();
 
                  Integer offsetMinutes = i * (movieDuration+timings.getBufferTime());
@@ -66,7 +71,7 @@ public class TimingsService {
                  newTiming.setStartTime(startTime);
                  newTiming.setEndTime(endTime);
                  newTiming.setBufferTime(bufferMinutes);
-                 newTiming.setApplicableTill(LocalDate.now().plusDays(5));
+                 newTiming.setApplicableTill(movie.getEndDate());
 
                  timingMain.addTiming(newTiming);
 

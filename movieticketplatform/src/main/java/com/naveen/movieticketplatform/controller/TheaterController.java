@@ -1,6 +1,8 @@
 package com.naveen.movieticketplatform.controller;
 
+import com.naveen.movieticketplatform.dto.TheaterCreationRequestDto;
 import com.naveen.movieticketplatform.dto.TheaterRequestDto;
+import com.naveen.movieticketplatform.entity.MainTheater;
 import com.naveen.movieticketplatform.entity.Theater;
 import com.naveen.movieticketplatform.service.TheaterService;
 import jakarta.validation.Valid;
@@ -17,8 +19,8 @@ public class TheaterController {
     private final TheaterService theaterService;
 
     @PostMapping
-    public ResponseEntity<Theater> createTheater(@Valid @RequestBody TheaterRequestDto request) {
-        Theater theater = theaterService.createTheater(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(theater);
+    public ResponseEntity<MainTheater> createTheater(@Valid @RequestBody TheaterCreationRequestDto request) {
+        MainTheater mainTheater = theaterService.createTheater(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mainTheater);
     }
 }

@@ -1,12 +1,16 @@
 package com.naveen.movieticketplatform.service;
 
+import com.naveen.movieticketplatform.dto.TheaterCreationRequestDto;
 import com.naveen.movieticketplatform.dto.TheaterPricingDto;
 import com.naveen.movieticketplatform.dto.TheaterRequestDto;
+import com.naveen.movieticketplatform.entity.MainTheater;
 import com.naveen.movieticketplatform.entity.Seat;
 import com.naveen.movieticketplatform.entity.Theater;
 import com.naveen.movieticketplatform.entity.TheaterSeatPricing;
 import com.naveen.movieticketplatform.enums.SeatType;
+import com.naveen.movieticketplatform.mapper.MainTheaterMapper;
 import com.naveen.movieticketplatform.mapper.TheaterMapper;
+import com.naveen.movieticketplatform.repository.MainTheaterRepository;
 import com.naveen.movieticketplatform.repository.SeatRepository;
 import com.naveen.movieticketplatform.repository.TheaterRepository;
 import com.naveen.movieticketplatform.repository.TheaterSeatPricingRepository;
@@ -26,34 +30,44 @@ public class TheaterService {
     private final SeatRepository seatRepository;
     private final TheaterMapper theaterMapper;
     private final TheaterSeatPricingRepository theaterSeatPricingRepository;
+    private final MainTheaterMapper mainTheaterMapper;
+    private final MainTheaterRepository mainTheaterRepository;
 
     @Transactional
-    public Theater createTheater(TheaterRequestDto theater){
+    public MainTheater createTheater(TheaterCreationRequestDto theater){
+        MainTheater mainTheater=mainTheaterMapper.toMainTheaterEntity(theater);
 
-        Theater newTheater=theaterMapper.toTheaterEntity(theater);
-        newTheater.setIsActive(true);
-        newTheater.setCreatedBy(1L);
-        Theater savedTheater= theaterRepository.save(newTheater);
+        MainTheater savedMainTheater=mainTheaterRepository.save(mainTheater);
+        for(TheaterRequestDto subTheater:theater.getSubTheaters()){
+            Theater newTheater=theaterMapper.toTheaterEntity(subTheater);
+            newTheater.setIsActive(true);
+            newTheater.setCreatedBy(1L);
+            newTheater.setMainTheater(mainTheater);
+            Theater savedTheater= theaterRepository.save(newTheater);
+
+            List<Seat> seats=generateSeatOfTheater(savedTheater,subTheater.getReclinerRowIndexes(),subTheater.getRegularRowIndexes());
+            if(!seats.isEmpty()){
+                int batchSize = 50;
+                for (int i = 0; i < seats.size(); i += batchSize) {
+                    int end = Math.min(i + batchSize, seats.size());
+                    seatRepository.saveAll(seats.subList(i, end));
+                    seatRepository.flush();
+                }
+            }
+
+        }
         for(TheaterPricingDto basePricing:theater.getTheaterBasePricing()){
             TheaterSeatPricing TheaterSeatPrice=new TheaterSeatPricing();
             TheaterSeatPrice.setBasePrice(basePricing.getPrice());
             TheaterSeatPrice.setSeatType(basePricing.getSeatType());
-            TheaterSeatPrice.setTheater(savedTheater);
+            TheaterSeatPrice.setMainTheater(savedMainTheater);
             TheaterSeatPrice.setIsActive(true);
             TheaterSeatPrice.setCreatedBy(1L);
             theaterSeatPricingRepository.save(TheaterSeatPrice);
         }
-        List<Seat> seats=generateSeatOfTheater(savedTheater,theater.getReclinerRowIndexes(),theater.getRegularRowIndexes());
-        if(!seats.isEmpty()){
-            int batchSize = 50;
-            for (int i = 0; i < seats.size(); i += batchSize) {
-                int end = Math.min(i + batchSize, seats.size());
-                seatRepository.saveAll(seats.subList(i, end));
-                seatRepository.flush();
-            }
-        }
 
-        return  savedTheater;
+
+        return  savedMainTheater;
     }
 
     public List<Seat> generateSeatOfTheater(Theater theater, Set<Integer> reclinerRowIndexes,Set<Integer> regularRowIndexes){
