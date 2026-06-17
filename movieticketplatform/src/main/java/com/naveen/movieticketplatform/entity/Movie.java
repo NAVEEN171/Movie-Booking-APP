@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "movies")
-public class Movie extends BaseEntity  {
+public class Movie extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,12 +28,6 @@ public class Movie extends BaseEntity  {
 
     @Column(nullable = false)
     private Integer durationInMin;
-
-    @Column(nullable = false)
-    private LocalDate startDate;
-
-    @Column(nullable = false)
-    private LocalDate endDate;
 
     @Column(nullable = false)
     private LocalDate releaseDate;
@@ -65,20 +59,6 @@ public class Movie extends BaseEntity  {
             inverseJoinColumns = @JoinColumn(name = "format_id")
     )
     private Set<Format> formats = new HashSet<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theater_id", nullable = false)
-    private Theater theater;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "timing_main_id")
-    private TimingMain timingsMain;
-
-    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
-    private List<TheaterMoviePricing> pricingOverrides;
-
-    @Column(nullable = false)
-    private Boolean defaultTimings = true;
 
     @Column(nullable = false)
     private Boolean isActive = true;

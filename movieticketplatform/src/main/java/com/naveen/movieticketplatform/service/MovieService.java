@@ -45,7 +45,6 @@ public class MovieService {
             List<Language> languages = movieLanguageRepository.findAllById(movie.getLanguages());
             List<Format> formats = movieFormatsRepository.findAllById(movie.getFormats());
             List<Genre> genres = movieGenreRepository.findAllById(movie.getGenres());
-            Optional<Theater> theater = theaterRepository.findById(movie.getTheaterId());
 
             CensorRating censorRating = censorRatingRepository.findById(movie.getCensorRatingId())
                     .orElseThrow(() -> new NoSuchElementException("CensorRating not found"));
@@ -59,24 +58,16 @@ public class MovieService {
             if (genres.isEmpty()) {
                 throw new IllegalArgumentException("Invalid genre IDs provided: " + movie.getGenres());
             }
-            if (theater.isEmpty()) {
-                throw new NoSuchElementException("Theater not found with ID: " + movie.getTheaterId());
-            }
+
 
             Movie newMovie = movieMapper.toMovieEntity(movie);
             newMovie.setLanguages(new HashSet<>(languages));
             newMovie.setGenres(new HashSet<>(genres));
             newMovie.setFormats(new HashSet<>(formats));
-            newMovie.setTheater(theater.get());
             newMovie.setCensorRating(censorRating);
             Movie savedMovie = movieRepository.save(newMovie);
+            savedMovies.add(savedMovie);
 
-            TimingsRequestDto timingsRequest = movie.getTimings();
-            timingsRequest.setMovieId(savedMovie.getId());
-
-            TimingMain savedTimingMain = timingsService.createTheaterTimings(timingsRequest);
-            savedMovie.setTimingsMain(savedTimingMain);
-            savedMovies.add(movieRepository.save(savedMovie));
         }
 
         return savedMovies;

@@ -1,6 +1,5 @@
 package com.naveen.movieticketplatform.entity;
 
-import com.naveen.movieticketplatform.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.Data;
 

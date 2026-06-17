@@ -21,8 +21,8 @@ public class TheaterMoviePricing extends BaseEntity  {
     private Theater theater;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "movie_id", nullable = false)
-    private Movie movie;
+    @JoinColumn(name = "theater_movie_id", nullable = false)
+    private TheaterMovie theaterMovie;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

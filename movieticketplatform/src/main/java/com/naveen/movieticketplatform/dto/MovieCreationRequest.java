@@ -25,17 +25,11 @@ public class MovieCreationRequest {
     @NotNull
     private LocalDate releaseDate;
 
-    @NotNull
-    private LocalDate startDate;
-    @NotNull
-    private LocalDate endDate;
 
 
     @NotNull
     private Integer durationInMin;
 
-    @NotNull
-    private Long theaterId;
 
     private List<Long> genres;
 
@@ -46,8 +40,5 @@ public class MovieCreationRequest {
     @NotNull
     private Long censorRatingId;
 
-    private Boolean defaultTimings;
-
-    private TimingsRequestDto timings;
 
 }

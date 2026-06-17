@@ -16,8 +16,8 @@ public class Show extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "movie_id", nullable = false)
-    private Movie movie;
+    @JoinColumn(name = "theater_movie_id", nullable = false)
+    private TheaterMovie theaterMovie;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_id", nullable = false)
