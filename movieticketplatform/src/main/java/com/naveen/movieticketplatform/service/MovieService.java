@@ -1,17 +1,28 @@
 package com.naveen.movieticketplatform.service;
 
-
 import com.naveen.movieticketplatform.dto.MovieCreationRequest;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
-import com.naveen.movieticketplatform.entity.*;
+import com.naveen.movieticketplatform.entity.CensorRating;
+import com.naveen.movieticketplatform.entity.Format;
+import com.naveen.movieticketplatform.entity.Genre;
+import com.naveen.movieticketplatform.entity.Language;
+import com.naveen.movieticketplatform.entity.Movie;
+import com.naveen.movieticketplatform.entity.Theater;
+import com.naveen.movieticketplatform.entity.TimingMain;
 import com.naveen.movieticketplatform.mapper.MovieMapper;
-import com.naveen.movieticketplatform.repository.*;
+import com.naveen.movieticketplatform.repository.CensorRatingRepository;
+import com.naveen.movieticketplatform.repository.MovieFormatsRepository;
+import com.naveen.movieticketplatform.repository.MovieGenreRepository;
+import com.naveen.movieticketplatform.repository.MovieLanguageRepository;
+import com.naveen.movieticketplatform.repository.MovieRepository;
+import com.naveen.movieticketplatform.repository.TheaterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -23,56 +34,56 @@ public class MovieService {
     private final MovieGenreRepository movieGenreRepository;
     private final MovieMapper movieMapper;
     private final MovieRepository movieRepository;
-
     private final TheaterRepository theaterRepository;
     private final TimingsService timingsService;
     private final CensorRatingRepository censorRatingRepository;
 
-
     public List<Movie> createMovie(List<MovieCreationRequest> movieRequest) {
-        List<Movie> savedMovies=new ArrayList<>();
+        List<Movie> savedMovies = new ArrayList<>();
 
-        for(MovieCreationRequest movie:movieRequest){
+        for (MovieCreationRequest movie : movieRequest) {
             List<Language> languages = movieLanguageRepository.findAllById(movie.getLanguages());
             List<Format> formats = movieFormatsRepository.findAllById(movie.getFormats());
             List<Genre> genres = movieGenreRepository.findAllById(movie.getGenres());
-            Optional<Theater> theater=theaterRepository.findById(movie.getTheaterId());
+            Optional<Theater> theater = theaterRepository.findById(movie.getTheaterId());
+
             CensorRating censorRating = censorRatingRepository.findById(movie.getCensorRatingId())
-                    .orElseThrow(() -> new RuntimeException("CensorRating not found"));
-            if(languages.isEmpty()) {
-                throw new RuntimeException("Invalid language IDs provided: " + movie.getLanguages());
+                    .orElseThrow(() -> new NoSuchElementException("CensorRating not found"));
+
+            if (languages.isEmpty()) {
+                throw new IllegalArgumentException("Invalid language IDs provided: " + movie.getLanguages());
             }
-            if(formats.isEmpty()) {
-                throw new RuntimeException("Invalid format IDs provided: " + movie.getFormats());
+            if (formats.isEmpty()) {
+                throw new IllegalArgumentException("Invalid format IDs provided: " + movie.getFormats());
             }
-            if(genres.isEmpty()) {
-                throw new RuntimeException("Invalid genre IDs provided: " + movie.getGenres());
+            if (genres.isEmpty()) {
+                throw new IllegalArgumentException("Invalid genre IDs provided: " + movie.getGenres());
             }
-            if(theater.isEmpty()) {
-                throw new RuntimeException("Theater not found with ID: " + movie.getTheaterId());
+            if (theater.isEmpty()) {
+                throw new NoSuchElementException("Theater not found with ID: " + movie.getTheaterId());
             }
 
-            Movie newMovie=movieMapper.toMovieEntity(movie);
+            Movie newMovie = movieMapper.toMovieEntity(movie);
             newMovie.setLanguages(new HashSet<>(languages));
             newMovie.setGenres(new HashSet<>(genres));
             newMovie.setFormats(new HashSet<>(formats));
             newMovie.setTheater(theater.get());
             newMovie.setCensorRating(censorRating);
-            Movie savedMovie=movieRepository.save(newMovie);
+            Movie savedMovie = movieRepository.save(newMovie);
 
-
-
-            TimingsRequestDto timingsRequest=movie.getTimings();
+            TimingsRequestDto timingsRequest = movie.getTimings();
             timingsRequest.setMovieId(savedMovie.getId());
 
-            TimingMain savedTimingMain =timingsService.createTheaterTimings(timingsRequest);
+            TimingMain savedTimingMain = timingsService.createTheaterTimings(timingsRequest);
             savedMovie.setTimingsMain(savedTimingMain);
-            Movie savedTimingsMovie=movieRepository.save(savedMovie);
-            savedMovies.add(savedTimingsMovie);
-
-
+            savedMovies.add(movieRepository.save(savedMovie));
         }
 
         return savedMovies;
+    }
+
+    public Movie getMovie(Long movieId) {
+        return movieRepository.findById(movieId)
+                .orElseThrow(() -> new NoSuchElementException("Movie not found with ID: " + movieId));
     }
 }

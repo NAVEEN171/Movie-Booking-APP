@@ -1,8 +1,5 @@
 package com.naveen.movieticketplatform.service;
 
-
-import com.naveen.movieticketplatform.dto.TheaterPricingDto;
-import com.naveen.movieticketplatform.dto.TheaterRequestDto;
 import com.naveen.movieticketplatform.dto.TimingDto;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
 import com.naveen.movieticketplatform.entity.Movie;
@@ -15,13 +12,11 @@ import com.naveen.movieticketplatform.repository.TheaterRepository;
 import com.naveen.movieticketplatform.repository.TimingMainRepository;
 import com.naveen.movieticketplatform.repository.TimingRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,21 +27,22 @@ public class TimingsService {
     private final TheaterRepository theaterRepository;
     private final MovieRepository movieRepository;
 
-
     @Transactional
-    public TimingMain createTheaterTimings(TimingsRequestDto timings){
+    public TimingMain createTheaterTimings(TimingsRequestDto timings) {
 
-        Theater theater=theaterRepository.findById(timings.getTheaterId())
-                .orElseThrow(() -> new RuntimeException("Theater not found: " + timings.getTheaterId()));
+        Theater theater = theaterRepository.findById(timings.getTheaterId())
+                .orElseThrow(() -> new NoSuchElementException("Theater not found: " + timings.getTheaterId()));
 
-        Movie movie=movieRepository.findById(timings.getMovieId()).orElseThrow(()-> new RuntimeException("Movie Not Found: "+timings.getMovieId()));
-        TimingMain timingMain=new TimingMain();
+        Movie movie = movieRepository.findById(timings.getMovieId())
+                .orElseThrow(() -> new NoSuchElementException("Movie not found: " + timings.getMovieId()));
+
+        TimingMain timingMain = new TimingMain();
         timingMain.setTheater(theater);
         timingMain.setTimingsType(timings.getTimingsType());
         timingMain.setBufferTime(timings.getBufferTime());
         timingMain.setStartTime(timings.getStartTime());
 
-        if(TimingsType.MANUAL.equals(timings.getTimingsType())) {
+        if (TimingsType.MANUAL.equals(timings.getTimingsType())) {
 
             for (TimingDto timing : timings.getTimingsDto()) {
                 Timing newTiming = new Timing();
@@ -56,29 +52,25 @@ public class TimingsService {
                 newTiming.setApplicableTill(movie.getEndDate());
                 timingMain.addTiming(newTiming);
             }
+        } else {
+            for (int i = 0; i < timings.getNoOfShows(); i++) {
+                LocalTime baseStartTime = timings.getStartTime();
+                Integer movieDuration = movie.getDurationInMin();
+                Integer bufferMinutes = timings.getBufferTime();
+
+                Integer offsetMinutes = i * (movieDuration + timings.getBufferTime());
+                LocalTime startTime = baseStartTime.plusMinutes(offsetMinutes);
+                LocalTime endTime = startTime.plusMinutes(movieDuration);
+
+                Timing newTiming = new Timing();
+                newTiming.setStartTime(startTime);
+                newTiming.setEndTime(endTime);
+                newTiming.setBufferTime(bufferMinutes);
+                newTiming.setApplicableTill(movie.getEndDate());
+
+                timingMain.addTiming(newTiming);
+            }
         }
-        else{
-             for(int i=0;i<timings.getNoOfShows();i++){
-                 LocalTime baseStartTime = timings.getStartTime();
-                 Integer movieDuration = movie.getDurationInMin();
-                 Integer bufferMinutes = timings.getBufferTime();
-
-                 Integer offsetMinutes = i * (movieDuration+timings.getBufferTime());
-                 LocalTime startTime = baseStartTime.plusMinutes(offsetMinutes);
-                 LocalTime endTime =startTime.plusMinutes(movieDuration);
-
-                 Timing newTiming = new Timing();
-                 newTiming.setStartTime(startTime);
-                 newTiming.setEndTime(endTime);
-                 newTiming.setBufferTime(bufferMinutes);
-                 newTiming.setApplicableTill(movie.getEndDate());
-
-                 timingMain.addTiming(newTiming);
-
-
-             }
-        }
-
 
         return timingMainRepository.save(timingMain);
     }

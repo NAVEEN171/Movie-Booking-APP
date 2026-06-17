@@ -7,10 +7,7 @@ import com.naveen.movieticketplatform.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +23,10 @@ public class MovieController {
 
     return ResponseEntity.ok(movieService.createMovie(movieRequest));
 
+    }
+
+    @GetMapping("/{movieId}")
+    public ResponseEntity<Movie> getMovie(@PathVariable Long movieId){
+         return ResponseEntity.ok(movieService.getMovie(movieId));
     }
 }
