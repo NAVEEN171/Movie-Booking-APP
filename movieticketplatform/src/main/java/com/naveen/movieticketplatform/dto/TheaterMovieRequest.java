@@ -1,5 +1,6 @@
 package com.naveen.movieticketplatform.dto;
 
+import com.naveen.movieticketplatform.enums.TimingsType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,6 +20,8 @@ public class TheaterMovieRequest {
 
     @NotNull
     private LocalDate endDate;
+
+    private TimingsType timingsType;
 
     private TimingsRequestDto timings;
 
