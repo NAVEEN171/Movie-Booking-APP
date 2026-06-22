@@ -19,7 +19,7 @@ public class TheaterMovieController {
     private final TheaterMovieService theaterMovieService;
 
     @PostMapping
-    public ResponseEntity<TheaterMovie> linkTheaterToMovie(@Valid  @RequestBody TheaterMovieRequest request){
+    public ResponseEntity<String> linkTheaterToMovie(@Valid  @RequestBody TheaterMovieRequest request){
       return ResponseEntity.ok(theaterMovieService.linkTheaterToMovie(request));
     }
 }

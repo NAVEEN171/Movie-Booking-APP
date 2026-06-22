@@ -7,11 +7,14 @@ import com.naveen.movieticketplatform.dto.TimingsRequestDto;
 import com.naveen.movieticketplatform.entity.*;
 import com.naveen.movieticketplatform.enums.TimingsType;
 import com.naveen.movieticketplatform.repository.MovieRepository;
+import com.naveen.movieticketplatform.repository.TheaterMoviePricingRepository;
 import com.naveen.movieticketplatform.repository.TheaterMovieRepository;
 import com.naveen.movieticketplatform.repository.TheaterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -22,8 +25,11 @@ public class TheaterMovieService {
     private final TheaterRepository theaterRepository;
     private final  TimingsService timingsService;
     private final TheaterMovieRepository theaterMovieRepository;
+    private final TheaterMoviePricingRepository theaterMoviePricingRepository;
 
-    public TheaterMovie linkTheaterToMovie(TheaterMovieRequest request){
+
+@Transactional
+    public String linkTheaterToMovie(TheaterMovieRequest request){
 
         Optional<Movie> movie=movieRepository.findById(request.getMovieId());
         if(movie.isEmpty()){
@@ -31,12 +37,16 @@ public class TheaterMovieService {
         }
         Optional<Theater> theater= theaterRepository.findById(request.getTheaterId());
         if(theater.isEmpty()){
-            throw new NoSuchElementException("provided movie " + request.getTheaterId()+" not found! ");
+            throw new NoSuchElementException("provided theater " + request.getTheaterId()+" not found! ");
         }
 
         TheaterMovie theaterMovie=new TheaterMovie();
         theaterMovie.setMovie(movie.get());
         theaterMovie.setTheater(theater.get());
+        theaterMovie.setIsActive(true);
+        theaterMovie.setStartDate(request.getStartDate());
+        theaterMovie.setEndDate(request.getEndDate());
+        TheaterMovie savedTheaterMovie=theaterMovieRepository.save(theaterMovie);
 
         TimingMain savedTimings=timingsService.createTheaterTimings(request.getTimings());
         theaterMovie.setTimingsMain(savedTimings);
@@ -46,21 +56,21 @@ public class TheaterMovieService {
         else{
             theaterMovie.setDefaultTimings(false);
         }
-        theaterMovie.setIsActive(true);
-        theaterMovie.setStartDate(request.getStartDate());
-        theaterMovie.setEndDate(request.getEndDate());
-        TheaterMovie savedTheaterMovie=theaterMovieRepository.save(theaterMovie);
+        theaterMovieRepository.save(savedTheaterMovie);
+
 
         for(TheaterPricingDto theaterPrice:request.getTicketPrices()){
             TheaterMoviePricing theaterMoviePricing=new TheaterMoviePricing();
             theaterMoviePricing.setTheater(theater.get());
             theaterMoviePricing.setTheaterMovie(savedTheaterMovie);
+            theaterMoviePricing.setStartTime(LocalDate.now());
             theaterMoviePricing.setOverridePrice(theaterPrice.getPrice());
             theaterMoviePricing.setSeatType(theaterPrice.getSeatType());
             theaterMoviePricing.setCreatedBy(1L);
+            theaterMoviePricingRepository.save(theaterMoviePricing);
         }
 
 
-        return savedTheaterMovie;
+        return "Created Successfully";
     }
 }

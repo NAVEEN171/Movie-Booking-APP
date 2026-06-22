@@ -1,6 +1,7 @@
 package com.naveen.movieticketplatform.service;
 
 import com.naveen.movieticketplatform.dto.MovieCreationRequest;
+import com.naveen.movieticketplatform.dto.MovieListResponse;
 import com.naveen.movieticketplatform.dto.TimingsRequestDto;
 import com.naveen.movieticketplatform.entity.CensorRating;
 import com.naveen.movieticketplatform.entity.Format;
@@ -34,8 +35,6 @@ public class MovieService {
     private final MovieGenreRepository movieGenreRepository;
     private final MovieMapper movieMapper;
     private final MovieRepository movieRepository;
-    private final TheaterRepository theaterRepository;
-    private final TimingsService timingsService;
     private final CensorRatingRepository censorRatingRepository;
 
     public List<Movie> createMovie(List<MovieCreationRequest> movieRequest) {
@@ -76,5 +75,13 @@ public class MovieService {
     public Movie getMovie(Long movieId) {
         return movieRepository.findById(movieId)
                 .orElseThrow(() -> new NoSuchElementException("Movie not found with ID: " + movieId));
+    }
+
+    public List<MovieListResponse> getMoviesInALocation(String location){
+        List<MovieListResponse> movies= movieRepository.getMoviesInALocation(location);
+        if(movies.isEmpty()){
+            throw new NoSuchElementException("no movies found in "+location);
+        }
+        return movies;
     }
 }
