@@ -36,4 +36,6 @@ public class TheaterMoviePricing extends BaseEntity  {
 
 
     private LocalDate endTime;
+
+    private Boolean isActive = true;
 }
