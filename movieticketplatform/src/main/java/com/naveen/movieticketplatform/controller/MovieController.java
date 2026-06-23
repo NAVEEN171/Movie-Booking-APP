@@ -3,6 +3,7 @@ package com.naveen.movieticketplatform.controller;
 
 import com.naveen.movieticketplatform.dto.MovieCreationRequest;
 import com.naveen.movieticketplatform.dto.MovieListResponse;
+import com.naveen.movieticketplatform.dto.TheaterMovieListResponse;
 import com.naveen.movieticketplatform.entity.Movie;
 import com.naveen.movieticketplatform.service.MovieService;
 import jakarta.validation.Valid;
@@ -36,5 +37,10 @@ public class MovieController {
     @GetMapping("/movies-per-location")
     public ResponseEntity<List<MovieListResponse>> getMoviesInALocation(@RequestParam  String location){
         return ResponseEntity.ok(movieService.getMoviesInALocation(location));
+    }
+
+    @GetMapping("/theaters-in-location")
+    public ResponseEntity<List<TheaterMovieListResponse>> getTheatersInALocationByMovie(@RequestParam String location, @RequestParam Long movieId){
+        return ResponseEntity.ok(movieService.getMoviesByLocationAndMovieId(location,movieId));
     }
 }
