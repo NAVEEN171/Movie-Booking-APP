@@ -4,7 +4,9 @@ import com.naveen.movieticketplatform.entity.*;
 import com.naveen.movieticketplatform.enums.SeatType;
 import com.naveen.movieticketplatform.enums.ShowSeatStatus;
 import com.naveen.movieticketplatform.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ShowSeatsGenerateScheduler {
     private final TheaterMovieRepository theaterMovieRepository;
     private final TimingRepository timingRepository;
@@ -23,6 +26,7 @@ public class ShowSeatsGenerateScheduler {
     private final TheaterMoviePricingRepository theaterMoviePricingRepository;
     private final TheaterSeatPricingRepository theaterSeatPricingRepository;
 
+    @Transactional
     public List<Long> generateShowsForTheNextDay(LocalDate movieDate) {
         List<Long> successTheaters = new ArrayList<>();
 
@@ -31,9 +35,12 @@ public class ShowSeatsGenerateScheduler {
             throw new IllegalArgumentException("Cannot generate a show for previous days");
 
         }
+        log.info("started generating shows for the day {}",needToGenerateDay);
+
         List<TheaterMovie> theaterMovies = theaterMovieRepository.fetchTheaterMoviesOnSpecifiedDay(needToGenerateDay);
         theaterMovies.stream().forEach(theaterMovie -> {
             try {
+                log.info("started generating show for the movie theater {}",theaterMovie.getId());
                 Movie movie = theaterMovie.getMovie();
                 Theater theater = theaterMovie.getTheater();
                 if (movie == null || Boolean.FALSE.equals(movie.getIsActive()) || theater == null || Boolean.FALSE.equals(theater.getIsActive())) {
@@ -66,7 +73,7 @@ public class ShowSeatsGenerateScheduler {
                     newShow.setShowDate(needToGenerateDay);
                     newShow.setIsActive(true);
                     Show savedShow = showsRepository.save(newShow);
-
+                    List<ShowSeat> showSeats=new ArrayList<>();
                     for (Seat seat : seats) {
                         ShowSeat newShowSeat = new ShowSeat();
                         newShowSeat.setSeat(seat);
@@ -82,13 +89,24 @@ public class ShowSeatsGenerateScheduler {
                         }
 
                         if (!BigDecimal.ZERO.equals(newShowSeat.getFinalPrice())) {
+                            showSeats.add(newShowSeat);
+
                             showSeatsRepository.save(newShowSeat);
                         }
                     }
+                    int batchSize = 50;
+                    for (int i = 0; i < showSeats.size(); i += batchSize) {
+                        int end = Math.min(i + batchSize, showSeats.size());
+                        showSeatsRepository.saveAll(showSeats.subList(i, end));
+                        showSeatsRepository.flush();
+                    }
+
                 }
+
                 successTheaters.add(theaterMovie.getId());
+                log.info("successfully created shows for the theaterMovie {}",theaterMovie.getId());
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("error creating shows for the theaterMovie {} {}",theaterMovie.getId(),e.getMessage());
             }
         });
         return successTheaters;

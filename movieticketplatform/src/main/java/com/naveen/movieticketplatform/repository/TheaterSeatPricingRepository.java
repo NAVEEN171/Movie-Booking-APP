@@ -10,7 +10,9 @@ import java.util.List;
 public interface TheaterSeatPricingRepository extends JpaRepository<TheaterSeatPricing,Long> {
 
     @Query(value = """
-            select * from theater_seat_pricing tsp where tsp.theater_id = theaterId and tsp.is_active = 1 
+             select tsp.* from theater_seat_pricing tsp
+              join main_theaters mt on tsp.main_theater_id=mt.id
+              join theaters t on t.main_theater_id=mt.id where t.id= :theaterId and tsp.is_active = true
             """,nativeQuery = true)
     List<TheaterSeatPricing> getTheaterBasicSeatPrices(@Param("theaterId") Long theaterId);
 }

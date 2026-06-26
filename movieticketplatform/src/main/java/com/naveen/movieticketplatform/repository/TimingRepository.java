@@ -11,7 +11,7 @@ import java.util.Locale;
 public interface TimingRepository extends JpaRepository<Timing,Long> {
 
     @Query(value = """
-      select * from timings t where t.timings_main_id = :timingId and t.applicable_till> = :specifiedDay and t.is_active=true
+      select * from timings t where t.timings_main_id = :timingId and t.applicable_till >= :specifiedDay and t.is_active=true
     """,nativeQuery = true)
     List<Timing> getTimingsForTheMovie(Long timingId, LocalDate specifiedDay);
 }

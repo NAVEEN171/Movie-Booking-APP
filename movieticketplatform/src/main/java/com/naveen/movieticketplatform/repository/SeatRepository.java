@@ -13,7 +13,7 @@ import java.util.List;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     @Query(value = """
-      select * from seat s where s.theater_id = :theaterId 
+      select * from seats s where s.theater_id = :theaterId 
       """,nativeQuery = true)
     List<Seat>  getSeatsOfTheater(Long theaterId);
 }

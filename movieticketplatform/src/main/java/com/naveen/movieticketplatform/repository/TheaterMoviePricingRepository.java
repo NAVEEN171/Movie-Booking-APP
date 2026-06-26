@@ -11,7 +11,7 @@ public interface TheaterMoviePricingRepository  extends JpaRepository<TheaterMov
 
 
     @Query(value = """
-            select * from theater_movie_pricing tmp where tmp.theater_movie_id = :theaterMovieId and tmp.is_active = 1
+            select * from theater_movie_pricing tmp where tmp.theater_movie_id = :theaterMovieId and tmp.is_active = true
             """,nativeQuery = true)
     List<TheaterMoviePricing> customMoviePricing(@Param("theaterMovieId") Long theaterMovieId);
 }
